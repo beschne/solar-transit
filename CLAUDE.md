@@ -8,7 +8,7 @@ CLI script that predicts when aircraft will transit in front of the solar disk, 
 
 This project will be published as a **public GitHub repo**. The file `observer.yaml` is gitignored and must never be committed — it contains the home location. The template `observer.example.yaml` is the committed substitute.
 
-Only the repository owner commits. Claude must never commit or push — not even with `--no-verify`. Draft commit messages if asked, but leave the actual commit to the owner.
+Claude may commit and push when asked. Do not add a `Co-Authored-By` trailer or any other Claude attribution to commit messages — commits appear solely under the repository owner's name.
 
 ## Related project
 

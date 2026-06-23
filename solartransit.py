@@ -310,7 +310,7 @@ def _az_in_fov(az: float, fov_min, fov_max) -> bool:
     return az >= fov_min or az <= fov_max   # handles 350°–10° style wraparound
 
 def render(rows, sun_az, sun_el, r_sun, source, obs_label,
-           fov_min, fov_max, pred_cfg, error, cycle_s=REFRESH_S):
+           fov_min, fov_max, pred_cfg, error, cycle_s=REFRESH_S, total_fetched=0):
     fov_ok  = _az_in_fov(sun_az, fov_min, fov_max)
     now_str = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
 
@@ -361,7 +361,7 @@ def render(rows, sun_az, sun_el, r_sun, source, obs_label,
     imm = sum(1 for r in rows if r["state"] == "IMMINENT")
     wat = sum(1 for r in rows if r["state"] == "WATCH")
     print()
-    print(f"  {_D}{len(rows)} displayed · {imm} imminent · {wat} watch"
+    print(f"  {_D}{total_fetched} fetched · {len(rows)} displayed · {imm} imminent · {wat} watch"
           f"  ·  refresh {cycle_s} s{_R}")
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -450,7 +450,8 @@ def main():
             ))
 
             render(rows, sun_az0, sun_el0, r_sun, source, obs_label,
-                   fov_min, fov_max, pred_cfg, error, cycle_s)
+                   fov_min, fov_max, pred_cfg, error, cycle_s,
+                   total_fetched=len(planes))
 
             time.sleep(max(0.0, cycle_s - (time.monotonic() - t0)))
 

@@ -33,7 +33,8 @@ _loader = Loader(str(_HERE))    # skyfield stores de421.bsp here
 
 CONFIG_FILE  = _HERE / "observer.yaml"
 EXAMPLE_FILE = _HERE / "observer.example.yaml"
-REFRESH_S    = 5
+REFRESH_S      = 5    # poll interval when sun is in FOV
+REFRESH_S_IDLE = 60   # poll interval when sun is outside FOV
 USER_AGENT   = "solartransit/1.0 (personal hobby use)"
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -309,7 +310,7 @@ def _az_in_fov(az: float, fov_min, fov_max) -> bool:
     return az >= fov_min or az <= fov_max   # handles 350°–10° style wraparound
 
 def render(rows, sun_az, sun_el, r_sun, source, obs_label,
-           fov_min, fov_max, pred_cfg, error):
+           fov_min, fov_max, pred_cfg, error, cycle_s=REFRESH_S):
     fov_ok  = _az_in_fov(sun_az, fov_min, fov_max)
     now_str = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
 
@@ -361,7 +362,7 @@ def render(rows, sun_az, sun_el, r_sun, source, obs_label,
     wat = sum(1 for r in rows if r["state"] == "WATCH")
     print()
     print(f"  {_D}{len(rows)} displayed · {imm} imminent · {wat} watch"
-          f"  ·  refresh {REFRESH_S} s{_R}")
+          f"  ·  refresh {cycle_s} s{_R}")
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
@@ -396,14 +397,20 @@ def main():
             sun_az0, sun_el0, r_sun = sun_azel(site, sun_body, t_now)
             sun_az1, sun_el1, _     = sun_azel(site, sun_body, t_future)
 
-            data   = get_aircraft(lat, lon, radius_nm)
-            planes = data["aircraft"]
-            source = data.get("source")
-            error  = data.get("error")
+            fov_active = sun_el0 > 0 and _az_in_fov(sun_az0, fov_min, fov_max)
+            cycle_s    = REFRESH_S if fov_active else REFRESH_S_IDLE
+
+            if fov_active:
+                data   = get_aircraft(lat, lon, radius_nm)
+                planes = data["aircraft"]
+                source = data.get("source")
+                error  = data.get("error")
+            else:
+                planes, source, error = [], None, None
 
             rows = []
 
-            if sun_el0 > 0:    # skip geometry when sun is below horizon
+            if fov_active:
                 for ac in planes:
                     if not isinstance(ac.get("alt_ft"), (int, float)):
                         continue
@@ -433,9 +440,7 @@ def main():
 
                     state = classify(pred, r_sun, pred_cfg) if pred else "SKIP"
 
-                    fov_ok = _az_in_fov(sun_az0, fov_min, fov_max)
-                    if fov_ok:
-                        maybe_alert(ac, pred, state, pred_cfg)
+                    maybe_alert(ac, pred, state, pred_cfg)
 
                     rows.append({"ac": ac, "cur_sep": cur_sep, "pred": pred,
                                  "slant_km": slant_km, "state": state})
@@ -445,9 +450,9 @@ def main():
             ))
 
             render(rows, sun_az0, sun_el0, r_sun, source, obs_label,
-                   fov_min, fov_max, pred_cfg, error)
+                   fov_min, fov_max, pred_cfg, error, cycle_s)
 
-            time.sleep(max(0.0, REFRESH_S - (time.monotonic() - t0)))
+            time.sleep(max(0.0, cycle_s - (time.monotonic() - t0)))
 
     except KeyboardInterrupt:
         print("\nStopped.")

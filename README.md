@@ -100,7 +100,7 @@ Altitude precision is critical. A **100 m error produces ~0.57° of angular erro
 
 #### Querying opentopodata.org
 
-The API takes a latitude/longitude pair and returns the terrain elevation at that point. Example using the **Lohrberg** in Frankfurt-Seckbach — the highest hill within Frankfurt city limits (~175 m), topped by a public vineyard and restaurant with an open panoramic view to the south and southwest, easily reachable by public transport:
+The API takes a latitude/longitude pair and returns the terrain elevation at that point. Example using the [Lohrberg](https://en.wikipedia.org/wiki/Lohrberg_(Frankfurt_am_Main)) in Frankfurt-Seckbach — the highest hill within Frankfurt city limits (~175 m), topped by a public vineyard and restaurant with an open panoramic view to the south and southwest, easily reachable by public transport:
 
 ```bash
 curl "https://api.opentopodata.org/v1/eudem25m?locations=50.1533,8.7400"

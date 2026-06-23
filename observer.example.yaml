@@ -1,0 +1,49 @@
+# observer.example.yaml — TEMPLATE. Copy to observer.yaml and fill in your real values.
+# observer.yaml is gitignored and will never be committed to a public repo.
+
+observer:
+  # WGS84 geodetic latitude/longitude in decimal degrees.
+  # North positive, East positive. Five decimal places ≈ 1 m precision.
+  latitude:  48.00000
+  longitude:  11.00000
+
+  # -------------------------------------------------------------------------
+  # ALTITUDE — this value is CRITICAL, not cosmetic.
+  #
+  # Use your true height above mean sea level (MSL) at the telescope position.
+  # Include rooftop / balcony height above ground level.
+  #
+  # WHY IT MATTERS: a 100 m error produces ~0.57° of angular error for an
+  # aircraft at 10 km slant range — larger than the full solar disk (0.53°).
+  # A predicted transit would simply miss.  Aim for ±10 m or better.
+  #
+  # How to get a good value:
+  #   1. Open Google Earth / Maps, drop a pin on your exact spot → reads MSL.
+  #   2. Add the height of your floor / balcony above ground.
+  #   3. DEM tools (e.g. opentopodata.org) give ~1 m accuracy for Germany.
+  # -------------------------------------------------------------------------
+  altitude_m: 100.0
+
+  # EGM96 geoid undulation for your area (ellipsoidal height = MSL + offset).
+  # Germany: roughly +44 to +50 m. Look up your exact value at:
+  #   https://geoid.bgi.obs-mip.fr/  or  use online NRCAN geoid calculator.
+  geoid_offset_m: 47.0
+
+  # Short name shown in the terminal header.
+  label: "My Balcony"
+
+  # Balcony / window field of view (azimuth, degrees from north clockwise).
+  # The script only fires alerts when the sun is within this range.
+  # Remove these two keys (or set to null) to disable the FOV gate.
+  fov_min_az: 180
+  fov_max_az: 270
+
+prediction:
+  window_seconds:     60     # how far ahead to extrapolate aircraft position
+  step_seconds:       0.5    # interpolation step for closest-approach scan
+  margin_deg:         0.10   # extra margin added to solar radius for transit threshold
+  watch_deg:          3.0    # show aircraft in table when min-sep falls below this
+  imminent_seconds:   30     # fire alert when transit is this many seconds away
+  display_cutoff_deg: 10.0   # hide aircraft whose min-sep exceeds this
+  qnh_hpa:            1013.25  # local QNH for barometric→geometric altitude correction
+  radius_nm:          50     # ADS-B search radius (nautical miles; 50 NM ≈ 92 km)

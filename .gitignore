@@ -1,0 +1,11 @@
+.venv/
+.DS_Store
+.vscode/
+__pycache__/
+*.pyc
+
+# Private — contains home coordinates. Never commit.
+observer.yaml
+
+# Skyfield ephemeris (downloaded automatically on first run, ~17 MB)
+*.bsp

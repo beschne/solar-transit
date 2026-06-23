@@ -6,8 +6,6 @@ The script fetches live ADS-B position data, computes each aircraft's angular po
 
 Designed for use with a **Seestar S30 Pro** (or any telescope tracking the sun) where the scope stays locked on the sun and aircraft fly through the frame automatically.
 
-![Terminal screenshot placeholder — IMMINENT / WATCH states with countdown]
-
 ## Strategy
 
 The script is the last step in a chain. Work through these prerequisites in order — if any one of them is missing, there is nothing to photograph.

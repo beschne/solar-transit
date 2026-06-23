@@ -94,9 +94,37 @@ observer:
 
 Altitude precision is critical. A **100 m error produces ~0.57° of angular error** for an aircraft at 10 km slant range — larger than the full solar disk (0.53°). A predicted transit would simply not appear.
 
-- Use **[opentopodata.org](https://api.opentopodata.org)** or Google Earth to get your MSL elevation to ±1 m.
+- Use **opentopodata.org** (REST API, see below) or Google Earth to get your MSL elevation to ±1 m.
 - Add the measured height of your balcony/rooftop above ground.
 - The `geoid_offset_m` converts MSL to WGS84 ellipsoidal height. Look up your value at [geoid.bgi.obs-mip.fr](https://geoid.bgi.obs-mip.fr/).
+
+#### Querying opentopodata.org
+
+The API takes a latitude/longitude pair and returns the terrain elevation at that point. Example using the **Lohrberg** in Frankfurt-Seckbach — the highest hill within Frankfurt city limits (~175 m), topped by a public vineyard and restaurant with an open panoramic view to the south and southwest, easily reachable by public transport:
+
+```bash
+curl "https://api.opentopodata.org/v1/eudem25m?locations=50.1533,8.7400"
+```
+
+```json
+{
+  "results": [{"dataset": "eudem25m", "elevation": 173.1, "location": {"lat": 50.1533, "lng": 8.74}}],
+  "status": "OK"
+}
+```
+
+Or from Python (no dependencies beyond stdlib):
+
+```python
+import urllib.request, json
+
+url = "https://api.opentopodata.org/v1/eudem25m?locations=50.1533,8.7400"
+with urllib.request.urlopen(url) as resp:
+    data = json.loads(resp.read())
+print(data["results"][0]["elevation"], "m MSL")
+```
+
+Replace the coordinates with your own location. The `eudem25m` dataset (EU-DEM, 25 m resolution) gives the best accuracy for open terrain in Europe. Dense forest canopy or built-up summits can cause the DEM to underestimate the true ground elevation — for those cases cross-check with Google Earth.
 
 ### Finding your geoid offset (Germany)
 
